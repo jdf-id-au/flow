@@ -1,0 +1,2 @@
+; necessary to wrap shadow/repl properly when run from deps repl
+{:middleware [shadow.cljs.devtools.server.nrepl/middleware]}
