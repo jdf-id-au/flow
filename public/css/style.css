@@ -1,8 +1,82 @@
-.spread { /* consider Bulma's level and level-{left,item,right} */
-    width: 100%;
+body {
+    margin: 0;
+    font-family: sans-serif;
+    background-color: black;
+    /*background-image: linear-gradient(to top left, black, darkslategray);*/
+    color: white;
+}
+#app {
     display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+header {
+    padding: 2vh;
+}
+h1, h2 {
+    margin: 0.5vh;
+}
+h1 {
+    font-size: 4vh;
+}
+h2 {
+    font-size: 2vh;
+}
+main {
+    padding: 0 2vh 0 2vh;
+    flex-grow: 1;
+    display: grid;
+    /*height: 100vh;*/
+    grid-template-columns: auto auto;
+}
+.tile {
+    /*background-image: linear-gradient(to top right, darkmagenta, black);*/
+    background-color: dimgrey;
+    padding: 1vw;
+    margin: 1vw;
+    display: flex;
+    flex-direction: column;
     justify-content: space-between;
 }
-.mega {
-    font-size: 3em;
+.header, .row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+.value {
+    font-size: 8vh;
+}
+.id, .button-value, .unit, .label {
+    font-size: 1.5vh;
+}
+.single .value {
+    display: flex;
+    justify-content: center;
+}
+.multi .value {
+    font-size: 4vh;
+}
+footer {
+    padding: 2vh;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+.button-bar {
+    margin-bottom: 1vh;
+}
+.button-name {
+    font-size: 1vh;
+    padding-right: 1vh;
+}
+.slider-widget .label {
+    display: flex;
+    justify-content: center;
+}
+.range {
+    width: 100%;
+}
+.scale {
+    display: flex;
+    justify-content: space-between;
 }

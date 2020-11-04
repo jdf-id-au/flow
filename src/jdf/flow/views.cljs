@@ -9,57 +9,65 @@
   (try (.toFixed v ({1 0, 0.1 1, 0.01 2} precision))
        (catch :default e (js/console.log v (string?  v)))))
 
-(defnc output [{:keys [id calcs]}]
+(defnc single [{:keys [id calcs]}]
   (let [{:keys [precision unit label]} (model/outputs id)]
-    (d/div {:class ["tile is-child"]}
-      (d/div {:class "spread"}
-        (d/span {:class "is-size-3"} (name id))
-        (d/span)
-        (d/span {:class "is-size-5"} unit))
-      (d/div {:class "mega has-text-centered"} (fix (id calcs) precision))
-      (d/div {:class "subtitle"} label))))
+    (d/div {:class "tile single"}
+      (d/div {:class "header"}
+        (d/span {:class "id"} (name id))
+        (d/span {:class "unit"} unit))
+      (d/div {:class "value"} (fix (id calcs) precision))
+      (d/div {:class "label"} label))))
 
-(defnc pair [{:keys [id1 id2 calcs]}]
-  (d/div {:class ["tile is-child"]}))
+(defnc multi [{:keys [ids calcs]}]
+  (d/div {:class "tile multi"}
+    (into []
+      (for [id ids :let [{:keys [precision unit label]} (model/outputs id)]]
+        (d/div {:class "row" :key id}
+          ; use hier css selector to lay out same classes differently
+          (d/span {:class "id"} (name id))
+          (d/span {:class "value"} (fix (id calcs) precision))
+          (d/span {:class "unit"} unit))))))
+          ; TODO where to put label?
 
-(defnc input [{:keys [selected set-selected id value]}]
+(defnc button [{:keys [selected set-selected id value]}]
   (let [{:keys [precision]} (model/inputs id)]
-    (d/button {:class ["button" (when selected "is-selected is-warning")]
-               :onClick #(set-selected id)} (d/span (d/b (name id)) \space (fix value precision)))))
+    (d/button {:class [(when selected "selected")]
+               :onClick #(set-selected id)}
+      (d/span {:class "button-name"} (name id))
+      (d/span {:class "button-value"} (fix value precision)))))
 
 (defnc root []
   (let [[state set-state] (hooks/use-state model/starting-values)
         [selected set-selected] (hooks/use-state :Q)
         calcs (model/calcs state)
         {:keys [label min max precision unit low high typical]} (model/inputs selected)]
-    (d/section {:class "hero is-dark is-bold is-fullheight"}
-      (d/div {:class "hero-head"}
-        (d/div {:class "container"}
-          (d/h1 {:class "title"} "Perfusion toy")
-          (d/h2 {:class "subtitle"} "Not for clinical use!")))
-      (d/div {:class "hero-body"}
-        (d/div {:class "container"}
-          (d/div {:class "tile is-ancestor"}
-            (d/div {:class "tile is-parent is-vertical is-8"}
-              ($ output {:id :QI :calcs calcs})
-              #_(into [] (for [id model/output-order :when (id calcs)]
-                           ($ output {:id id :key id :calcs calcs}))))
-            (d/div {:class "tile is-parent"}
-              ($ output {:id :DO2 :calcs calcs})))))
-      (d/div {:class "hero-foot"}
-
-        (d/div {:class "container"}
-          (d/div {:class "buttons has-addons is-centered"}
-            (into [] (for [id model/input-order]
-                       ; Need to pass a literal map as second argument to $ macro.
-                       ($ input {:id id :key id ; :key is for React, not for me!
-                                 :selected (= selected id) :set-selected set-selected
-                                 :value (id state)}))))
-          (d/div {:class "spread"} (d/span) label (d/span))
+    (<>
+      (d/header
+        (d/h1 "Perfusion toy")
+        (d/h2 "Not for clinical use!"))
+      (d/main
+        ($ single {:id :QI :calcs calcs})
+        ($ single {:id :DO2 :calcs calcs})
+        ($ multi {:ids [:flow :flow-adj] :calcs calcs})
+        ($ multi {:ids [:SVR :SVRI] :calcs calcs})
+        ($ multi {:ids [:BMI :BSA] :calcs calcs}))
+      (d/footer
+        (d/div {:class "button-bar"}
+          (into [] (for [id model/input-order]
+                     ; Need to pass a literal map as second argument to $ macro.
+                     ($ button {:id id :key id ; :key is for React, not me!
+                                :value (id state)
+                                :selected (= selected id)
+                                :set-selected set-selected}))))
+        (d/div {:class "slider-widget"}
+          (d/div {:class "label"} label)
           (d/input {:type "range" :min min :max max :step precision
-                    :style {:width "100%"}
+                    :class "range" ; better css selector?
                     :value (selected state)
-                    :onChange #(set-state ; range input returns text ugh
-                                 (fn [s] (assoc s selected (js/parseFloat (.. % -target -value)))))})
-          (d/div {:class "spread"}
-            min (d/span) (fix (selected state) precision) \space unit (d/span) max))))))
+                    :onChange #(set-state ; range input returns string ugh
+                                 (fn [s] (assoc s selected
+                                           (js/parseFloat (.. % -target -value)))))})
+          (d/div {:class "scale"}
+            (d/span min)
+            (d/span (fix (selected state) precision) \space unit)
+            (d/span max)))))))
