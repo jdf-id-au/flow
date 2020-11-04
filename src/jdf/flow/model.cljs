@@ -3,34 +3,34 @@
 
 ; FIXME be very careful when suggesting "normal" ranges! *** not fixed yet
 
-(defrecord Parameter [id min max unit label low high typical])
+(defrecord Parameter [id min max precision unit label low high typical])
 (def field-count (-> {} map->Parameter count))
 
 (def -inputs ; Use decimal/floating-point with all these
-  [:Q 0 7 "L/min" "systemic blood flow" nil nil 3
-   :MAP 0 300 "mmHg" "mean arterial pressure" 60 100 65
-   :CVP -10 100 "mmHg" "central venous pressure" -5 20 5
-   :SvO2 0 100 "%" "central venous oxygen saturation" 60 90 75
-   :Hb 0 250 "g/L" "haemoglobin concentration" 60 100 80
-   :T 15 40 "°C" "temperature" 18 37 34
-   :SaO2 0 100 "%" "arterial oxygen saturation" 95 nil 100
-   :PaO2 0 800 "mmHg" "arterial oxygen partial pressure" 400 nil 500
-   :height 75 250 "cm" "height" 120 200 170
-   :weight 40 250 "kg" "weight" 40 120 70])
+  [:Q 0 7 0.1 "L/min" "systemic blood flow" nil nil 3
+   :MAP 0 300 1 "mmHg" "mean arterial pressure" 60 100 65
+   :CVP -10 100 1 "mmHg" "central venous pressure" -5 20 5
+   :SvO2 0 100 1 "%" "central venous oxygen saturation" 60 90 75
+   :Hb 0 250 1 "g/L" "haemoglobin concentration" 60 100 80
+   :T 15 40 0.1 "°C" "temperature" 18 37 34
+   :SaO2 0 100 1 "%" "arterial oxygen saturation" 95 nil 100
+   :PaO2 0 800 1 "mmHg" "arterial oxygen partial pressure" 400 nil 500
+   :height 75 250 1 "cm" "height" 120 200 170
+   :weight 40 250 1 "kg" "weight" 40 120 70])
 ; sex...
 
 (def -outputs
   ; ugh https://www.lidco.com/education/normal-hemodynamic-parameters/
-  [:BSA 0 3 "sq m" "body surface area" nil nil 1.9
-   :QI 0 15 "L/min/m²" "systemic blood flow index" 1.8 3 2.4
-   :flow 0 150 "%" "percentage of full flow" 80 120 100
-   :flow-adj 0 150 "%" "percentage of full flow, temperature-adjusted" 80 120 100
-   :SVR 0 3000 "dyn⋅s⋅cm⁻⁵" "systemic vascular resistance" 800 1200 1000
-   :SVRI 0 4000 "dyn⋅s⋅cm⁻⁵/m²" "systemic vascular resistance index" 1970 2390 nil
-   :HCT 0 80 "%" "haematocrit" 20 45 40
-   :CaO2 0 400 "ml/L" "arterial oxygen content" 170 200 180
-   ;:CvO2 0 400 "ml/L" "venous oxygen content" 120 150 130
-   :DO2 0 2000 "mL/min" "oxygen delivery" 950 1150 1000])
+  [:BSA 0 3 0.01 "sq m" "body surface area" nil nil 1.9
+   :QI 0 15 0.1 "L/min/m²" "systemic blood flow index" 1.8 3 2.4
+   :flow 0 150 1 "%" "percentage of full flow" 80 120 100
+   :flow-adj 0 1 1 "%" "percentage of full flow, temperature-adjusted" 80 120 100
+   :SVR 0 3000 1 "dyn⋅s⋅cm⁻⁵" "systemic vascular resistance" 800 1200 1000
+   :SVRI 0 4000 1 "dyn⋅s⋅cm⁻⁵/m²" "systemic vascular resistance index" 1970 2390 nil
+   :HCT 0 80 1 "%" "haematocrit" 20 45 40
+   :CaO2 0 400 1 "ml/L" "arterial oxygen content" 170 200 180
+   ;:CvO2 0 400 1 "ml/L" "venous oxygen content" 120 150 130
+   :DO2 0 2000 1 "mL/min" "oxygen delivery" 950 1150 1000])
 
 (defn parts [raw]
   (assert (zero? (mod (count raw) field-count)))
@@ -108,8 +108,8 @@
         SVR= (SVR Q MAP CVP)]
     {:BSA BSA=
      :QI (/ Q BSA=)
-     :flow (/ Q 2.4)
-     :flow-adj (/ Q (adjusted 2.4 T))
+     :flow (-> Q (/ 2.4) (* 100))
+     :flow-adj (-> Q (/ (adjusted 2.4 T)) (* 100))
      :SVR SVR=
      :SVRI (/ SVR= BSA=)
      :HCT (* Hb Hb->HCT)
