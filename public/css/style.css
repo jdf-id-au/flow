@@ -1,0 +1,8 @@
+.spread { /* consider Bulma's level and level-{left,item,right} */
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+.mega {
+    font-size: 3em;
+}

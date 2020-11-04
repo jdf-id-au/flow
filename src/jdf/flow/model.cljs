@@ -21,7 +21,8 @@
 
 (def -outputs
   ; ugh https://www.lidco.com/education/normal-hemodynamic-parameters/
-  [:BSA 0 3 0.01 "sq m" "body surface area" nil nil 1.9
+  [:BSA 0 3 0.01 "m²" "body surface area" nil nil 1.9
+   :BMI 10 100 1 "kg/m²" "body mass index" 18 27 25
    :QI 0 15 0.1 "L/min/m²" "systemic blood flow index" 1.8 3 2.4
    :flow 0 150 1 "%" "percentage of full flow" 80 120 100
    :flow-adj 0 1 1 "%" "percentage of full flow, temperature-adjusted" 80 120 100
@@ -104,9 +105,11 @@
      (/ (- SaO2 SvO2) SaO2))
 
 (defn calcs [{:keys [Q MAP CVP SvO2 Hb T SaO2 PaO2 height weight]}]
+  ; FIXME indicate if out of range (i.e. invalid)
   (let [BSA= (BSA height weight)
         SVR= (SVR Q MAP CVP)]
     {:BSA BSA=
+     :BMI (/ weight (Math/pow (/ height 100) 2))
      :QI (/ Q BSA=)
      :flow (-> Q (/ 2.4) (* 100))
      :flow-adj (-> Q (/ (adjusted 2.4 T)) (* 100))
