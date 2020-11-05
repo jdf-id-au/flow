@@ -1,8 +1,8 @@
 body {
     margin: 0;
     font-family: sans-serif;
-    background-color: black;
-    /*background-image: linear-gradient(to top left, black, darkslategray);*/
+    /*background-color: black;*/
+    background-image: linear-gradient(to top left, #111111, #000000);
     color: white;
 }
 #app {
@@ -30,8 +30,7 @@ main {
     grid-template-columns: auto auto;
 }
 .tile {
-    /*background-image: linear-gradient(to top right, darkmagenta, black);*/
-    background-color: dimgrey;
+    background-image: linear-gradient(to top right, #4c4c4c, black);
     padding: 1vw;
     margin: 1vw;
     display: flex;
@@ -45,12 +44,16 @@ main {
 }
 .value {
     font-size: 8vh;
+    text-shadow: white 0 0 1vh;
 }
-.id, .button-value, .unit, .label {
+.id, button > .value, .unit, .label {
     font-size: 1.5vh;
 }
 .single .value {
     display: flex;
+    justify-content: center;
+}
+.multi {
     justify-content: center;
 }
 .multi .value {
@@ -65,9 +68,12 @@ footer {
 .button-bar {
     margin-bottom: 1vh;
 }
-.button-name {
+button > .name {
     font-size: 1vh;
     padding-right: 1vh;
+}
+button.selected {
+    background-color: mediumturquoise;
 }
 .slider-widget .label {
     display: flex;

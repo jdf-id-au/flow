@@ -21,6 +21,7 @@
 
 (def -outputs
   ; ugh https://www.lidco.com/education/normal-hemodynamic-parameters/
+  ; ugh unicode https://en.wikipedia.org/wiki/Unicode_subscripts_and_superscripts
   [:BSA 0 3 0.01 "m²" "body surface area" nil nil 1.9
    :BMI 10 100 1 "kg/m²" "body mass index" 18 27 25
    :QI 0 15 0.1 "L/min/m²" "systemic blood flow index" 1.8 3 2.4
@@ -46,6 +47,8 @@
 (def starting-values (into {} (for [[k {v :typical}] inputs] [k v])))
 (def output-order (->> -outputs parts (map first)))
 (def outputs (->> -outputs parts labelled))
+
+(def parameters (merge inputs outputs))
 
 (defn BSA "Body surface area (DuBois)"
   ; https://www.uptodate.com/contents/calculator-body-surface-area-in-adults-du-bois-method
@@ -107,12 +110,13 @@
 (defn calcs [{:keys [Q MAP CVP SvO2 Hb T SaO2 PaO2 height weight]}]
   ; FIXME indicate if out of range (i.e. invalid)
   (let [BSA= (BSA height weight)
+        QI= (/ Q BSA=)
         SVR= (SVR Q MAP CVP)]
     {:BSA BSA=
      :BMI (/ weight (Math/pow (/ height 100) 2))
-     :QI (/ Q BSA=)
-     :flow (-> Q (/ 2.4) (* 100))
-     :flow-adj (-> Q (/ (adjusted 2.4 T)) (* 100))
+     :QI QI=
+     :flow (-> QI= (/ 2.4) (* 100))
+     :flow-adj (-> QI= (/ (adjusted 2.4 T)) (* 100))
      :SVR SVR=
      :SVRI (/ SVR= BSA=)
      :HCT (* Hb Hb->HCT)
