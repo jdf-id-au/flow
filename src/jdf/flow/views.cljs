@@ -57,7 +57,7 @@
         ($ multi {:ids [:BMI :BSA] :calcs calcs}))
       (d/footer
         (d/div {:class "button-bar"}
-          (into [] (for [id model/input-order]
+          (into [] (for [id (keys model/inputs)]
                      ; Need to pass a literal map as second argument to $ macro.
                      ($ button {:id id :key id ; :key is for React, not me!
                                 :value (id state)
