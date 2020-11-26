@@ -1,7 +1,8 @@
 {:paths ["src"]
  :deps {org.clojure/clojure {:mvn/version "1.10.1"}
         org.clojure/clojurescript {:mvn/version "1.10.773"}
-        lilactown/helix {:mvn/version "0.0.12"}}
+        lilactown/helix {:mvn/version "0.0.12"}
+        jdf/comfort {:local/root "../../lib/comfort"}}
  :aliases
  {:dev {:extra-paths ["dev"]
         :extra-deps {thheller/shadow-cljs {:mvn/version "2.11.4"}

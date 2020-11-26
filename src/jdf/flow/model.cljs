@@ -1,17 +1,13 @@
 (ns jdf.flow.model
-  "Physiology parameters, units, values, ranges and calculations.")
-
-(defn register [factory & records]
-  ; TODO move to jdf/comfort, maybe rewrite jdf/flow model
-  (let [recs (map #(apply factory %) records)]
-    (apply array-map (interleave (map :id recs) recs))))
+  "Physiology parameters, units, values, ranges and calculations."
+  (:require [comfort.core :as cc]))
 
 ; FIXME be very careful when suggesting "normal" ranges! *** not fixed yet
 
 (defrecord Parameter [id min max precision unit label low high typical])
 
 (def inputs ; Use decimal/floating-point with all these
-  (register ->Parameter
+  (cc/register ->Parameter
      [:Q 0 7 0.1 "L/min" "systemic blood flow" nil nil 3]
      [:MAP 0 300 1 "mmHg" "mean arterial pressure" 60 100 65]
      [:CVP -10 100 1 "mmHg" "central venous pressure" -5 20 5]
@@ -25,11 +21,11 @@
 ; sex...
 
 (def outputs
-  (register ->Parameter
+  (cc/register ->Parameter
     ; ugh https://www.lidco.com/education/normal-hemodynamic-parameters/
     ; ugh unicode https://en.wikipedia.org/wiki/Unicode_subscripts_and_superscripts
     [:BSA 0 3 0.01 "m²" "body surface area" nil nil 1.9]
-    [:BMI 10 100 1 "kg/m²" "body mass index" 18 27 25]
+    [:BMI 10 100 0.1 "kg/m²" "body mass index" 18 27 25]
     [:QI 0 15 0.1 "L/min/m²" "systemic blood flow index" 1.8 3 2.4]
     [:flow 0 150 1 "%" "percentage of full flow" 80 120 100]
     [:flow-adj 0 1 1 "%" "percentage of full flow, temperature-adjusted" 80 120 100]
@@ -101,7 +97,7 @@
      (/ (- SaO2 SvO2) SaO2))
 
 (defn calcs [{:keys [Q MAP CVP SvO2 Hb T SaO2 PaO2 height weight]}]
-  ; FIXME indicate if out of range (i.e. invalid)
+  ; FIXME indicate (nil?) if out of range (i.e. invalid)
   (let [BSA= (BSA height weight)
         QI= (/ Q BSA=)
         SVR= (SVR Q MAP CVP)]
